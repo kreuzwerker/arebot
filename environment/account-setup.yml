@@ -1,0 +1,207 @@
+Parameters:
+  CloudTrailLoggingBucketName: {Default: arebot-sandbox-aws-cloudtrail-logs, Description: Name of the S3 bucket to store logs into., MinLength: '1', Type: String}
+  ConfigLoggingBucketName: {Default: arebot-sandbox-aws-config-logs, Description: Name of the S3 bucket to store logs into., MinLength: '1', Type: String}
+  PrimaryRegion: {Default: eu-central-1, Description: Primary Region, MinLength: '1', Type: String}
+
+Resources:
+
+  # AWS cloudtrail
+  CloudtrailLoggingBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref CloudTrailLoggingBucketName
+  CloudtrailLoggingBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket:
+        Ref: "CloudtrailLoggingBucket"
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - "s3:GetBucketAcl"
+            Effect: "Allow"
+            Resource:
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - {Ref: CloudTrailLoggingBucketName}
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+
+          -
+            Action:
+              - "s3:PutObject"
+            Effect: "Allow"
+            Resource:
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - {Ref: CloudTrailLoggingBucketName}
+                  - '/AWSLogs/'
+                  - !Ref "AWS::AccountId"
+                  - '/*'
+            Principal:
+              Service: "cloudtrail.amazonaws.com"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: "bucket-owner-full-control"
+  CloudTrail:
+    DependsOn:
+      - CloudTrailTopic
+      - CloudtrailLoggingBucket
+    Properties:
+      EnableLogFileValidation: 'true'
+      IncludeGlobalServiceEvents: 'true'
+      IsLogging: 'true'
+      IsMultiRegionTrail: 'true'
+      S3BucketName: {Ref: CloudTrailLoggingBucketName}
+      SnsTopicName:
+        Fn::GetAtt:
+          - CloudTrailTopic
+          - TopicName
+    Type: AWS::CloudTrail::Trail
+  CloudTrailTopic:
+    Properties: {TopicName: aws-cloudtrail}
+    Type: AWS::SNS::Topic
+  CloudTrailTopicPolicy:
+    DependsOn: CloudTrailTopic
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action: ['sns:Publish']
+          Effect: Allow
+          Principal:
+            Service: [cloudtrail.amazonaws.com]
+          Resource: ['*']
+          Sid: ServiceStatement
+        - Action: ['sns:Subscribe']
+          Effect: Allow
+          Principal:
+            AWS:
+            - Fn::Join:
+              - ':'
+              - - 'arn:aws:iam:'
+                - !Ref "AWS::AccountId"
+                - root
+          Resource: ['*']
+          Sid: AuditStatement
+      Topics:
+      - {Ref: CloudTrailTopic}
+    Type: AWS::SNS::TopicPolicy
+
+  # AWS config
+
+  ConfigRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [config.amazonaws.com]
+      ManagedPolicyArns: ['arn:aws:iam::aws:policy/service-role/AWSConfigRole']
+      RoleName: AWSConfigRole
+    Type: AWS::IAM::Role
+
+  ConfigLoggingBucket:
+    Type: AWS::S3::Bucket
+    #DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref ConfigLoggingBucketName
+  ConfigLoggingBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket:
+        Ref: "ConfigLoggingBucket"
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - "s3:GetBucketAcl"
+            Effect: "Allow"
+            Resource:
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - {Ref: ConfigLoggingBucketName}
+            Principal:
+              Service: "config.amazonaws.com"
+          -
+            Action:
+              - "s3:PutObject"
+            Effect: "Allow"
+            Resource:
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - {Ref: ConfigLoggingBucketName}
+                  - '/AWSLogs/'
+                  - !Ref "AWS::AccountId"
+                  - '/Config/*'
+            Principal:
+              Service: "config.amazonaws.com"
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: "bucket-owner-full-control"
+
+  ConfigRule0:
+    DependsOn: [ConfigurationRecorder]
+    Properties:
+      ConfigRuleName: cloudtrail-enabled
+      InputParameters:
+        s3BucketName: {Ref: CloudTrailLoggingBucketName}
+      Source: {Owner: AWS, SourceIdentifier: CLOUD_TRAIL_ENABLED}
+    Type: AWS::Config::ConfigRule
+  ConfigRule1:
+    DependsOn: [ConfigurationRecorder]
+    Properties:
+      ConfigRuleName: root-account-mfa-enabled
+      InputParameters: {}
+      Source: {Owner: AWS, SourceIdentifier: ROOT_ACCOUNT_MFA_ENABLED}
+    Type: AWS::Config::ConfigRule
+
+  ConfigTopic:
+    Properties: {TopicName: aws-config}
+    Type: AWS::SNS::Topic
+  ConfigTopicPolicy:
+    DependsOn: ConfigTopic
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action: ['sns:Publish']
+          Effect: Allow
+          Principal:
+            Service: [config.amazonaws.com]
+          Resource: ['*']
+          Sid: ServiceStatement
+        - Action: ['sns:Subscribe']
+          Effect: Allow
+          Principal:
+            AWS:
+            - Fn::Join:
+              - ':'
+              - - 'arn:aws:iam:'
+                - !Ref "AWS::AccountId"
+                - root
+          Resource: ['*']
+          Sid: AuditStatement
+      Topics:
+      - {Ref: ConfigTopic}
+    Type: AWS::SNS::TopicPolicy
+  ConfigurationRecorder:
+    DependsOn: ConfigRole
+    Properties:
+      RecordingGroup: {AllSupported: 'true', IncludeGlobalResourceTypes: 'true'}
+      RoleARN:
+        Fn::GetAtt: [ConfigRole, Arn]
+    Type: AWS::Config::ConfigurationRecorder
+  DeliveryChannel:
+    DependsOn:
+      - ConfigTopic
+      - ConfigLoggingBucket
+    Properties:
+      S3BucketName: {Ref: ConfigLoggingBucketName}
+      SnsTopicARN: {Ref: ConfigTopic}
+    Type: AWS::Config::DeliveryChannel

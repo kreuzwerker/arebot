@@ -1,0 +1,62 @@
+<table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:0px;margin:0px;min-width: 600px">
+    <tr>
+        <td bgcolor="#9c64ec" height="30"></td>
+    </tr>
+    <tr>
+        <td bgcolor="#9c64ec" align="center">
+            <table cellpadding="0" cellspacing="0" border="0" width="600" style="padding:0px;margin:0px;width:600px">
+                <tr>
+                    <td bgcolor="#ffffff" color="#111111" align="center" valign="bottom" height="130" style="border-radius: 4px 4px 0px 0px; font-size: 48px; font-weight: 400; letter-spacing: 2px;">
+                      <h1 style="font-size: 32px; font-weight: 400; margin: 0;">Compliance problem(s)</h1>
+                      <h2 style="font-size: 25px; font-weight: 400; margin-top: 5px;">detected</h2>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td bgcolor="#f4f4f4" align="center">
+            <table cellpadding="15" cellspacing="0" width="600" style="padding:0px;margin:0px;width:600px">
+                <tr>
+                    <td bgcolor="#ffffff" color="#666666" height="100" style="font-size: 18px; font-weight: 400;" >
+                        <p style="line-height:25px">The recent activities of the account <span style="color:#9c64ec;font-weight:700">{{.AccountID}} </span> - <span style="color:#9c64ec;font-weight:700"> {{.AccountRegion}} </span> have raised the following resource compliance problem(s):</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td bgcolor="#ffffff" align="center">
+                        <table class="table-problems" align="center" width="570">
+                            <tr height="30">
+                                <th></th>
+                                <th bgcolor="#f9f4ff" colspan="3" align="center">Non-compliance</th>
+                            </tr>
+                            <tr height="30">
+                                <th bgcolor="#e9deff" align="center">Resource ID</th>
+                                <th bgcolor="#e9deff" align="center">Property</th>
+                                <th bgcolor="#e9deff" align="center">Value</th>
+                            </tr>
+                            {{range .Results}}{{if not .CheckResult.IsCompliant}}<tr>
+								<td align="center">{{.CheckResult.ResourceId}}</td>
+                                <td align="center">{{.CheckResult.Check.Name}}</td>
+                                <td align="center">{{.FormattedValue}}</td>
+                            </tr>{{end}}{{end}}
+                          </table>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td bgcolor="#f4f4f4" align="center" style="padding:0px;margin:0px;">
+            <br/><br/>
+            <table border="0" cellpadding="10" cellspacing="10" width="600" style="padding:0px;margin:0px;width:600px">
+                <tr>
+                  <td bgcolor="#e9deff" align="center" style="border-radius: 4px 4px 4px 4px; color: #666666; font-size: 16px; font-weight: 400; line-height: 25px;" >
+                    <h2 style="font-size: 18px; font-weight: 400; color: #111111; margin: 0;">For any other questions,</h2>
+                    <p style="margin: 0;"><a href="mailto:#" target="_top" style="color: #9c64ec; font-weight:700">email us.</a></p>
+                  </td>
+                </tr>
+            </table>
+            <br/><br/>
+        </td>
+    </tr>
+</table>

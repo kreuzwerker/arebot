@@ -1,0 +1,219 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS Rule Enforcement BOT resources
+
+Parameters:
+  TestAccount:
+    Type: Number
+    Description: Account number of the test account
+    Default: 000000000000
+  ProdAccount:
+    Type: Number
+    Description: Account number of the production account
+    Default: 999999999999
+
+Conditions:
+  TestAccount: !Equals [ !Ref "AWS::AccountId", "000000000000" ]
+  ProdAccount: !Equals [ !Ref "AWS::AccountId", "999999999999" ]
+
+Resources:
+  AreBotRootRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: AreBot
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+          -
+            Effect: "Allow"
+            Principal:
+              AWS:
+                # prod account
+                - "arn:aws:iam::999999999999:root"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "AreBOTPermissions"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - !If
+                - ProdAccount
+                -
+                  Effect: "Allow"
+                  Action:
+                    - "sts:AssumeRole"
+                  Resource: "*"
+                - !Ref "AWS::NoValue"
+              -
+                Effect: "Allow"
+                Action:
+                  - "ec2:*"
+                  - "sqs:*"
+                  - "s3:*"
+                  - "ses:*"
+                  - "dynamodb:*"
+                Resource: "*"
+              -
+                Effect: "Deny"
+                Action:
+                  - ec2:DeleteVp*
+                  - ec2:CreateVp*
+                  - ec2:DetachVp*
+                  - ec2:DisableV*
+                  - ec2:EnableV*
+                  - ec2:ModifyVpc*
+                  - ec2:RejectVpc*
+                  - ec2:CreateSubnet
+                  - ec2:DeleteSubnet
+                  - ec2:ModifySubnet*
+                  - ec2:DeleteNetworkAcl*
+                  - ec2:CreateNetworkAcl*
+                  - ec2:ReplaceNetworkAcl*
+                  - ec2:AssociateRouteTable
+                  - ec2:CreateRoute*
+                  - ec2:CreateRoute*
+                  - ec2:CreateVpnConnectionRoute
+                  - ec2:DeleteRoute*
+                  - ec2:DisassociateRouteTable
+                  - ec2:ReplaceRoute*
+                  - ec2:DeleteFlowLogs
+                  - ec2:CreateFlowLogs
+                  - ec2:MoveAddressToVpc
+                  - ec2:AcceptVpcPeeringConnection
+                  - ec2:AttachVpnGateway
+                  - ec2:AttachClassicLinkVpc
+                Resource: "*"
+              -
+                Effect: "Deny"
+                Action:
+                  - sqs:DeleteQueue
+                  - sqs:AddPermission
+                  - sqs:RemovePermission
+                Resource: "*"
+              -
+                Effect: "Deny"
+                Action:
+                  - ses:Delete*
+                  - ses:PutIdentityPolicy
+                  - ses:SetIdentity*
+                  - ses:UpdateReceiptRule
+                  - ses:Verify*
+                Resource: "*"
+              -
+                Effect: "Deny"
+                Action:
+                  - s3:DeleteBucket*
+                  - s3:PutBucket*
+                  - s3:PutLifecycleConfiguration
+                  - s3:PutReplicationConfiguration
+                Resource: "*"
+
+  AreBotRootRoleInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Condition: ProdAccount
+    Properties:
+      Path: "/"
+      InstanceProfileName: AreBotRootRoleInstanceProfile
+      Roles:
+        -
+          Ref: "AreBotRootRole"
+
+  AreBotEventQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: "AreBotEventQueue"
+
+  AreBotEventQueuePolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      PolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Id": "AreBotEventQueuePolicy",
+          "Statement": [
+            {
+              "Sid": "AWSEvents_event_bot",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": "sqs:SendMessage",
+              "Resource": "${AreBotEventQueue.Arn}",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": "${AreBotEventsRule.Arn}"
+                }
+              }
+            }
+          ]
+        }
+      Queues:
+        - !Ref AreBotEventQueue
+
+  AreBotEventsRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: AreBotEventsRule
+      Description: "AreBot Event Rule"
+      EventPattern:
+        source:
+          - "aws.ec2"
+          - "aws.s3"
+      State: "ENABLED"
+      Targets:
+        -
+          Arn: !GetAtt ["AreBotEventQueue", "Arn"]
+          Id: "AreBotEventQueue"
+
+  # AreBotStateS3Bucket:
+  #   Condition: ProdAccount
+  #   Type: AWS::S3::Bucket
+  #   DeletionPolicy: Retain
+  #   Properties:
+  #     AccessControl: Private
+  #     BucketName: !Sub '${AWS::Region}-arebot-state'
+  #     VersioningConfiguration:
+  #       Status: Enabled
+  #     Tags:
+  #       - Key: Owner
+  #         Value: dev.arebot@kreuzwerker.de
+
+  # CheckResultsStorage:
+  #   Type: "AWS::DynamoDB::Table"
+  #   Properties:
+  #     AttributeDefinitions:
+  #       -
+  #         AttributeName: "ResourceId"
+  #         AttributeType: "S"
+  #       -
+  #         AttributeName: "DateAndTypeComposite"
+  #         AttributeType: "S"
+  #     KeySchema:
+  #       -
+  #         AttributeName: "ResourceId"
+  #         KeyType: "HASH"
+  #       -
+  #         AttributeName: "DateAndTypeComposite"
+  #         KeyType: "RANGE"
+  #     ProvisionedThroughput:
+  #       ReadCapacityUnits: "5"
+  #       WriteCapacityUnits: "5"
+  #     TableName: "CompliantCheckResult"
+
+Outputs:
+  AreBotEventQueue:
+    Description: AreBot event queue address
+    Value: !Ref AreBotEventQueue
+  AreBotRootRole:
+    Condition: ProdAccount
+    Description: AreBot IAM role
+    Value: !GetAtt [AreBotRootRole,Arn]

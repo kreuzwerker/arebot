@@ -1,0 +1,6 @@
+vendor
+dist
+.test
+.checkresult_states
+misc/sqs-dump/queue-messages/
+.DS_Store

@@ -1,0 +1,104 @@
+hash: 962526cf399b946ac86d68cfa892566df210fb2ee1d7f8df9247ea870663bce5
+updated: 2017-07-25T11:13:55.338673503+02:00
+imports:
+- name: github.com/aokoli/goutils
+  version: 3391d3790d23d03408670993e957e8f408993c34
+- name: github.com/apex/go-apex
+  version: 2273a39e2ad2111fe0f7d9873fdc3d98d781e1c0
+- name: github.com/aws/aws-sdk-go
+  version: 96358b8282b1a3aa66836d2f2fe66216cc419668
+  subpackages:
+  - aws
+  - service/sqs
+  - aws/session
+  - service/ec2
+  - service/s3
+  - aws/credentials
+  - aws/credentials/stscreds
+  - service/ses
+  - aws/awserr
+  - aws/endpoints
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/request
+  - aws/signer/v4
+  - private/protocol
+  - private/protocol/query
+  - aws/corehandlers
+  - aws/defaults
+  - service/dynamodb
+  - service/dynamodb/dynamodbattribute
+  - private/protocol/ec2query
+  - private/protocol/restxml
+  - internal/shareddefaults
+  - service/sts
+  - private/protocol/rest
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/ec2metadata
+  - private/protocol/jsonrpc
+  - private/protocol/json/jsonutil
+- name: github.com/cenkalti/backoff
+  version: 61153c768f31ee5f130071d08fc82b85208528de
+- name: github.com/go-ini/ini
+  version: e7fea39b01aea8d5671f6858f0532f56e8bff3a5
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 8c683ee571b6ee7ffc9f1cafd13103c422e71cbf
+- name: github.com/guregu/dynamo
+  version: f6629bc6b1a0d7b52e1e025bfc8f6eaf75e7bd2a
+  subpackages:
+  - internal/exprs
+- name: github.com/hashicorp/errwrap
+  version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
+- name: github.com/hashicorp/go-multierror
+  version: ed905158d87462226a13fe39ddf685ea65f1c11f
+- name: github.com/hashicorp/hcl
+  version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/token
+  - json/parser
+  - hcl/scanner
+  - hcl/strconv
+  - json/scanner
+  - json/token
+- name: github.com/huandu/xstrings
+  version: 3959339b333561bf62a38b424fd41517c2c90f40
+- name: github.com/imdario/mergo
+  version: 3e95a51e0639b4cf372f2ccf74c86749d747fbdc
+- name: github.com/jmespath/go-jmespath
+  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/Masterminds/semver
+  version: 59c29afe1a994eacb71c833025ca7acf874bb1da
+- name: github.com/Masterminds/sprig
+  version: e039e20e500c2c025d9145be375e27cf42a94174
+- name: github.com/robfig/cron
+  version: 736158dc09e10f1911ca3a1e1b01f11b566ce5db
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+- name: github.com/Sirupsen/logrus
+  version: 10f801ebc38b33738c9d17d50860f484a0988ff5
+- name: golang.org/x/crypto
+  version: dd85ac7e6a88fc6ca420478e934de5f1a42dd3c6
+  subpackages:
+  - scrypt
+  - pbkdf2
+- name: golang.org/x/net
+  version: ab5485076ff3407ad2d02db054635913f017b0ed
+  subpackages:
+  - context
+- name: golang.org/x/sys
+  version: 90796e5a05ce440b41c768bd9af257005e470461
+  subpackages:
+  - unix
+- name: gopkg.in/asn1-ber.v1
+  version: 379148ca0225df7a432012b8df0355c2a2063ac0
+- name: gopkg.in/ldap.v2
+  version: 8168ee085ee43257585e50c6441aadf54ecb2c9f
+devImports: []

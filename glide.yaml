@@ -1,0 +1,11 @@
+package: .
+import:
+- package: github.com/aws/aws-sdk-go
+  version: ~1.8.11
+- package: github.com/hashicorp/hcl
+- package: github.com/apex/go-apex
+- package: github.com/Sirupsen/logrus
+- package: github.com/gorilla/mux
+- package: gopkg.in/ldap.v2
+- package: github.com/Masterminds/sprig
+- package: github.com/robfig/cron

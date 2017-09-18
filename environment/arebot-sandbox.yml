@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS Rule Enforcement BOT resources sandbox
+
+Parameters:
+  Vpc:
+    Type: String
+    Default: vpc-v0000000
+  SubnetID:
+    Type: String
+    Default: subnet-s0000000
+  ArebotInstanceType:
+    Type: String
+    Default: t2.small
+
+Mappings:
+  RegionMap:
+    eu-west-2:
+      ArebotInstanceAmi: ami-ed100689
+    # EU (Ireland)
+    eu-west-1:
+      ArebotInstanceAmi: ami-d7b9a2b1
+    # EU (Frankfurt)
+    eu-central-1:
+      ArebotInstanceAmi: ami-82be18ed
+
+Resources:
+
+  ArebotInstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ELB security group
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/32
+        IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+      - CidrIp: 0.0.0.0/32
+        IpProtocol: tcp
+        FromPort: '8080'
+        ToPort: '8080'
+      VpcId: !Ref Vpc
+
+  ArebotInstance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      IamInstanceProfile: AreBotRootRoleInstanceProfile
+      ImageId:
+        !FindInMap [RegionMap, !Ref "AWS::Region", ArebotInstanceAmi ]
+      InstanceType:
+        Ref: ArebotInstanceType
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet:
+            - Ref: "ArebotInstanceSG"
+          SubnetId:
+            Ref: "SubnetID"
+      Tags:
+        - Key: Name
+          Value: AreBOT instance
