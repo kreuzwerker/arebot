@@ -8,9 +8,9 @@ Using AreBOT, you can define complex compliance policies using a simple and flex
 The AreBOT client is developed in Go, and uses the AWS SDK for Go to interact with the AWS services deployed on the AWS account to monitor.
 
 # Links
-- "The Quest for Cloud Compliance - Challenges and Available Tools" [link#1]
-- "Cloud Compliance made Simple: Meet AreBOT" [link#2]
-- "Cloud Compliance using AreBOT: Designing Complex Compliance Policies"" [link#3]
+- ["The Quest for Cloud Compliance - Challenges and Available Tools"](https://kreuzwerker.de/blog/posts/the-quest-for-cloud-compliance-challenges-and-available-tools)
+- "Cloud Compliance made Simple: Meet AreBOT" (soon to be published)
+- "Cloud Compliance using AreBOT: Designing Complex Compliance Policies" (soon to be published)
 
 # Quick Install
 
