@@ -1,8 +1,12 @@
 language: go
 
 go:
-  - 1.8.x
-  - master
+    - 1.8.x
+    - master
 sudo: false
+install:
+    - go get -v github.com/Masterminds/glide
+    - cd $GOPATH/src/github.com/Masterminds/glide && git checkout 80afe4dd8c6bfd830a1561e7c577c9f650430817 && go install && cd -
+    - glide install
 script:
-  - go test -cover
+    - go test -cover
