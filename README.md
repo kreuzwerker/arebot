@@ -1,4 +1,6 @@
 # AreBOT
+[![Build Status](https://travis-ci.org/kreuzwerker/arebot.svg?branch=master)](https://travis-ci.org/kreuzwerker/arebot)
+
 AreBOT is an automatic and highly configurable tool to monitor your Amazon Web Services (AWS) cloud environments for resource compliance violations. Any detected violation can be reported to the specified set of recipients (e.g., administrators), and, in some cases, automatically corrected. The goal of AreBOT is to simplify the design and enforcement of compliance policies in complex AWS cloud infrastructures - possibly multi-region/account.
 
 AreBOT supports both real-time and scheduled resource compliance checking. The AWS resources currently supported are Elastic Compute Cloud (EC2) Instances, Security Groups, Elastic Block Store Volumes and Snapshots. Support for Simple Storage Service Buckets is also on the way.
