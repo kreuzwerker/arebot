@@ -67,11 +67,16 @@ func main() {
 
 	configFile, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		log.Errorf("Terminate Arebot execution")
+		os.Exit(1)
+		// panic(err)
 	}
 	cfg, err = config.ParseConfig(string(configFile[:]))
 	if err != nil {
-		panic(err)
+		log.Error(err)
+		log.Errorf("Terminate Arebot execution")
+		os.Exit(1)
 	}
 	core.Cfg = cfg
 	securitygroup.Cfg = cfg

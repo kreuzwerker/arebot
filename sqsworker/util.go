@@ -17,6 +17,8 @@ package sqsworker
 */
 
 import (
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
@@ -27,7 +29,8 @@ func NewSQSClient(queueName string, cfgs ...*aws.Config) (*sqs.SQS, string) {
 	sess, err := session.NewSession()
 	if err != nil {
 		Log.Warn("failed to create session,", err)
-		return nil, ""
+		panic(err)
+		// return nil, ""
 	}
 	svc := sqs.New(sess, cfgs...)
 	// try and find the queue url
@@ -40,8 +43,10 @@ func NewSQSClient(queueName string, cfgs ...*aws.Config) (*sqs.SQS, string) {
 	if err != nil {
 		// Print the error, cast err to aws err.Error to get the Code and
 		// Message from an error.
-		Log.Warn(err.Error())
-		return nil, ""
+		Log.Errorf("Impossible to access the '%s' SQS queue specified in the configuration file: %s", queueName, err.Error())
+		Log.Errorf("Terminate Arebot execution")
+		os.Exit(1)
+		// return nil, ""
 	}
 
 	return svc, aws.StringValue(resp.QueueUrl)
