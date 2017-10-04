@@ -11,7 +11,7 @@ The AreBOT client is developed in Go, and uses the AWS SDK for Go to interact wi
 
 # Links
 - ["The Quest for Cloud Compliance - Challenges and Available Tools"](https://kreuzwerker.de/blog/posts/the-quest-for-cloud-compliance-challenges-and-available-tools)
-- "Cloud Compliance made Simple: Meet AreBOT" (soon to be published)
+- ["Cloud Compliance made Simple: Meet AreBOT"](https://kreuzwerker.de/blog/posts/meet-arebot)
 - "Cloud Compliance using AreBOT: Designing Complex Compliance Policies" (soon to be published)
 
 # Quick Install
